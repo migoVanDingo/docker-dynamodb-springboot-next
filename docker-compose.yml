@@ -1,0 +1,46 @@
+version: "3.8"
+services:
+  dynamodb:
+    image: amazon/dynamodb-local
+    container_name: dynamodb
+    hostname: dynamodb
+    restart: always
+    volumes:
+      - ./backend/dynamodb-local:/app/data
+    ports:
+      - 8000:8000
+    expose:
+      - "8000"
+    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath /app/data/"
+
+  backend:
+    container_name: backend
+    image: backend
+    build:
+      context: ./backend
+      dockerfile: ./Dockerfile
+    ports:
+      - 8080:8080
+    expose:
+      - "8080"
+    links:
+      - "dynamodb:db"
+      - "frontend:fe"
+
+  frontend:
+    container_name: frontend
+    image: frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - 3000:3000
+    expose:
+      - "3000"
+    volumes: 
+      - ./frontend/src:/app/src
+
+
+
+volumes:
+  app:
